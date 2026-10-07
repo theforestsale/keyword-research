@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block title %}AI Keyword Tools{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>AI Keyword Tools</h1>
+    <p class="subtitle">Free AI-powered tools for keyword expansion, intent, clustering, and PPC planning.</p>
+</div>
+
+<div class="tools-grid">
+    <div class="tool-card">
+        <h2>Keyword Expansion</h2>
+        <p>Generate long-tail variations and question-based suggestions from a seed keyword.</p>
+        <form method="post" action="{{ url_for('research.tools_expand') }}" class="tool-form">
+            <label>Seed keyword
+                <input type="text" name="seed" required maxlength="100" placeholder="e.g. digital marketing">
+            </label>
+            <label>Number of ideas
+                <select name="count">
+                    <option value="5">5</option>
+                    <option value="10" selected>10</option>
+                    <option value="15">15</option>
+                    <option value="20">20</option>
+                </select>
+            </label>
+            <button type="submit" class="btn btn-primary">Expand</button>
+        </form>
+    </div>
+
+    <div class="tool-card">
+        <h2>Intent Classification</h2>
+        <p>Classify each keyword as informational, commercial, transactional, or navigational.</p>
+        <form method="post" action="{{ url_for('research.tools_intent') }}" class="tool-form">
+            <label>Keywords (one per line)
+                <textarea name="keywords" rows="5" required placeholder="best coffee beans&#10;buy coffee online&#10;what is cold brew"></textarea>
+            </label>
+            <button type="submit" class="btn btn-primary">Classify</button>
+        </form>
+    </div>
+
+    <div class="tool-card">
+        <h2>Content Clustering</h2>
+        <p>Group keywords into topic clusters with content briefs and angles.</p>
+        <form method="post" action="{{ url_for('research.tools_cluster') }}" class="tool-form">
+            <label>Topic
+                <input type="text" name="topic" placeholder="e.g. organic coffee (optional)">
+            </label>
+            <label>Keywords (one per line)
+                <textarea name="keywords" rows="5" required placeholder="organic coffee beans&#10;best organic coffee&#10;coffee subscriptions"></textarea>
+            </label>
+            <button type="submit" class="btn btn-primary">Cluster</button>
+        </form>
+    </div>
+
+    <div class="tool-card">
+        <h2>PPC &amp; Budget Forecast</h2>
+        <p>Estimate impressions, clicks, CTR, CPC, and monthly budget per keyword.</p>
+        <form method="post" action="{{ url_for('research.tools_ppc') }}" class="tool-form">
+            <label>Keywords (one per line)
+                <textarea name="keywords" rows="5" required placeholder="organic coffee beans&#10;best coffee subscription"></textarea>
+            </label>
+            <button type="submit" class="btn btn-primary">Forecast</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

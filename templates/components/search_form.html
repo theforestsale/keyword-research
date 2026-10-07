@@ -1,0 +1,35 @@
+<form method="post" action="{{ url_for('research.do_research') }}" id="searchForm" class="search-form">
+    <div class="form-row">
+        <input
+            type="text"
+            name="seed"
+            placeholder="e.g. organic coffee beans"
+            maxlength="100"
+            required
+            autofocus
+            autocomplete="off"
+        >
+    </div>
+    <div class="form-row form-options">
+        <label>
+            Intent:
+            <select name="intent">
+                <option value="all">All</option>
+                <option value="informational">Informational</option>
+                <option value="commercial">Commercial</option>
+                <option value="transactional">Transactional</option>
+                <option value="navigational">Navigational</option>
+            </select>
+        </label>
+        <label>
+            Count:
+            <select name="count">
+                <option value="5">5</option>
+                <option value="10" selected>10</option>
+                <option value="15">15</option>
+                <option value="20">20</option>
+            </select>
+        </label>
+    </div>
+    <button type="submit" class="btn btn-primary" id="submitBtn">Research Keywords</button>
+</form>

@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Import Keywords (CSV){% endblock %}
+
+{% block content %}
+<div class="results-header">
+    <h1>Bulk Import (CSV)</h1>
+    <a href="{{ url_for('main.index') }}" class="btn btn-secondary">Back to Home</a>
+</div>
+
+<section class="search-box">
+    <h3>Upload a CSV of seed keywords</h3>
+    <p class="muted">First column is treated as the keyword. Due to the free plan's limit of ~30 requests/minute, at most
+    <strong>{{ bulk_max }} keywords</strong> are processed per run (each producing {{ bulk_count }} related keywords).</p>
+    <form method="post" action="{{ url_for('manage.import_keywords') }}" enctype="multipart/form-data" class="search-form">
+        <div class="form-row">
+            <input type="file" name="file" accept=".csv" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Import &amp; Generate</button>
+    </form>
+</section>
+{% endblock %}

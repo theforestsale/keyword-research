@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}Folders{% endblock %}
+
+{% block content %}
+<div class="results-header">
+    <h1>Keyword Groups</h1>
+    <a href="{{ url_for('main.index') }}" class="btn btn-secondary">Back to Home</a>
+</div>
+
+<section class="search-box">
+    <h3>Create a new group</h3>
+    <form method="post" action="{{ url_for('manage.folder_create') }}" class="search-form">
+        <div class="form-row">
+            <input type="text" name="name" placeholder="Group name (e.g. Coffee Blog Content)" required maxlength="100">
+        </div>
+        <button type="submit" class="btn btn-primary">Create Group</button>
+    </form>
+</section>
+
+{% if folders %}
+<section class="folders-list">
+    {% for f in folders %}
+    <div class="folder-card">
+        <h3>{{ f.name }}</h3>
+        <p class="muted">{{ f.searches|length }} saved searches</p>
+        <ul class="folder-searches">
+            {% for s in f.searches %}
+            <li>
+                <a href="{{ url_for('research.view_results', search_id=s.id) }}">{{ s.seed_keyword }}</a>
+                <span class="muted">({{ s.keywords|length }} kws)</span>
+            </li>
+            {% else %}
+            <li class="muted">No searches yet.</li>
+            {% endfor %}
+        </ul>
+        <form method="post" action="{{ url_for('manage.folder_delete', folder_id=f.id) }}" onsubmit="return confirm('Delete this group? Its searches will be kept but ungrouped.');">
+            <button type="submit" class="btn btn-small btn-danger">Delete Group</button>
+        </form>
+    </div>
+    {% endfor %}
+</section>
+{% else %}
+<p class="empty">No groups yet. Create one above.</p>
+{% endif %}
+{% endblock %}

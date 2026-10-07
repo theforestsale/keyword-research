@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% block title %}Compare Searches{% endblock %}
+
+{% block content %}
+<div class="results-header">
+    <h1>Compare Two Searches</h1>
+    <a href="{{ url_for('main.index') }}" class="btn btn-secondary">Back to Home</a>
+</div>
+
+<section class="search-box">
+    <form method="post" action="{{ url_for('manage.compare') }}" class="search-form">
+        <div class="form-row form-options">
+            <label>Search A
+                <select name="id1" required>
+                    <option value="">-- choose --</option>
+                    {% for s in searches %}
+                    <option value="{{ s.id }}" {% if a and a.id==s.id %}selected{% endif %}>{{ s.seed_keyword }}</option>
+                    {% endfor %}
+                </select>
+            </label>
+            <label>Search B
+                <select name="id2" required>
+                    <option value="">-- choose --</option>
+                    {% for s in searches %}
+                    <option value="{{ s.id }}" {% if b and b.id==s.id %}selected{% endif %}>{{ s.seed_keyword }}</option>
+                    {% endfor %}
+                </select>
+            </label>
+        </div>
+        <button type="submit" class="btn btn-primary">Compare</button>
+    </form>
+</section>
+
+{% if a and b %}
+<section class="compare-row">
+    <div>
+        <h3>A: {{ a.seed_keyword }} <span class="muted">({{ a.keywords|length }} kws)</span></h3>
+        <div class="table-wrap">
+            <table class="results-table">
+                <thead><tr><th>Keyword</th><th>Vol</th><th>Diff</th><th>Intent</th><th>CPC</th></tr></thead>
+                <tbody>
+                    {% for kw in a.keywords %}
+                    <tr>
+                        <td>{{ kw.keyword }}</td>
+                        <td class="num">{{ "{:,}".format(kw.volume_est) }}</td>
+                        <td class="num">{{ kw.difficulty_est }}</td>
+                        <td>{{ kw.intent }}</td>
+                        <td class="num">${{ "%.2f"|format(kw.cpc_est) }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div>
+        <h3>B: {{ b.seed_keyword }} <span class="muted">({{ b.keywords|length }} kws)</span></h3>
+        <div class="table-wrap">
+            <table class="results-table">
+                <thead><tr><th>Keyword</th><th>Vol</th><th>Diff</th><th>Intent</th><th>CPC</th></tr></thead>
+                <tbody>
+                    {% for kw in b.keywords %}
+                    <tr>
+                        <td>{{ kw.keyword }}</td>
+                        <td class="num">{{ "{:,}".format(kw.volume_est) }}</td>
+                        <td class="num">{{ kw.difficulty_est }}</td>
+                        <td>{{ kw.intent }}</td>
+                        <td class="num">${{ "%.2f"|format(kw.cpc_est) }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+{% elif request.args.get('a') or request.args.get('b') %}
+<p class="empty">Could not load one of the selected searches.</p>
+{% endif %}
+{% endblock %}

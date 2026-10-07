@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+{% block title %}Results for "{{ search.query }}"{% endblock %}
+
+{% block content %}
+<div class="results-header">
+    <h1>Results for "{{ search.seed_keyword }}"</h1>
+    <div class="results-actions">
+        <button class="btn" id="copyBtn">Copy to Clipboard</button>
+        <a href="{{ url_for('research.export_results', search_id=search.id) }}" class="btn">Export CSV</a>
+        <a href="{{ url_for('main.index') }}" class="btn btn-secondary">New Search</a>
+    </div>
+</div>
+
+<div class="manage-bar">
+    <form method="post" action="{{ url_for('manage.search_rename', search_id=search.id) }}" class="inline-form">
+        <input type="text" name="name" value="{{ search.seed_keyword }}" maxlength="100" aria-label="Search name">
+        <button type="submit" class="btn btn-small">Rename</button>
+    </form>
+    <form method="post" action="{{ url_for('manage.search_assign_folder', search_id=search.id) }}" class="inline-form">
+        <select name="folder_id" aria-label="Assign to group">
+            <option value="">No group</option>
+            {% for f in folders %}
+            <option value="{{ f.id }}" {% if search.folder and search.folder.id==f.id %}selected{% endif %}>{{ f.name }}</option>
+            {% endfor %}
+        </select>
+        <button type="submit" class="btn btn-small">Assign</button>
+    </form>
+    <form method="post" action="{{ url_for('manage.search_delete', search_id=search.id) }}" class="inline-form"
+          onsubmit="return confirm('Delete this search and its results?');">
+        <button type="submit" class="btn btn-small btn-danger">Delete Search</button>
+    </form>
+</div>
+
+{% if keywords %}
+<div class="filter-bar">
+    <label for="intentFilter">Filter by intent:</label>
+    <select id="intentFilter">
+        <option value="all">All</option>
+        {% for i in intents %}
+        <option value="{{ i }}">{{ i|capitalize }}</option>
+        {% endfor %}
+    </select>
+    <span class="result-count" id="resultCount">{{ keywords|length }} keywords</span>
+</div>
+
+<div class="table-wrap">
+    <table class="results-table" id="resultsTable">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Keyword</th>
+                <th>Volume (est)</th>
+                <th>Difficulty</th>
+                <th>Intent</th>
+                <th>CPC (USD)</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for kw in keywords %}
+            <tr data-intent="{{ kw.intent }}">
+                <td class="rank">{{ loop.index }}</td>
+                <td class="keyword-cell">{{ kw.keyword }}</td>
+                <td class="num">{{ "{:,}".format(kw.volume_est) }}</td>
+                <td class="num">
+                    <span class="diff diff-{{ 'low' if kw.difficulty_est < 40 else 'med' if kw.difficulty_est < 70 else 'high' }}">
+                        {{ kw.difficulty_est }}
+                    </span>
+                </td>
+                <td><span class="intent-tag intent-{{ kw.intent }}">{{ kw.intent }}</span></td>
+                <td class="num">${{ "%.2f"|format(kw.cpc_est) }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<div class="shared-results hidden" id="sharedCopySource">
+    {% for kw in keywords %}
+    <div class="s-kw" data-k="{{ kw.keyword }}" data-v="{{ kw.volume_est }}" data-d="{{ kw.difficulty_est }}" data-i="{{ kw.intent }}" data-c="{{ kw.cpc_est }}"></div>
+    {% endfor %}
+</div>
+{% else %}
+<p class="empty">No keywords found for this search.</p>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/app.js') }}"></script>
+<script>
+    const resultsTable = document.getElementById('resultsTable');
+    const intentFilter = document.getElementById('intentFilter');
+    const resultCount = document.getElementById('resultCount');
+
+    if (intentFilter) {
+        intentFilter.addEventListener('change', function () {
+            const filter = this.value;
+            let visible = 0;
+            document.querySelectorAll('#resultsTable tbody tr').forEach(function (row) {
+                const match = filter === 'all' || row.dataset.intent === filter;
+                row.style.display = match ? '' : 'none';
+                if (match) visible++;
+            });
+            resultCount.textContent = visible + ' keywords';
+        });
+    }
+
+    const copyBtn = document.getElementById('copyBtn');
+    if (copyBtn) {
+        copyBtn.addEventListener('click', function () {
+            let text = '';
+            document.querySelectorAll('#resultsTable tbody tr').forEach(function (row) {
+                if (row.style.display === 'none') return;
+                const cells = row.querySelectorAll('td');
+                const kw = cells[1].textContent.trim();
+                const vol = cells[2].textContent.trim();
+                const diff = cells[3].textContent.trim();
+                const intent = cells[4].textContent.trim();
+                const cpc = cells[5].textContent.trim();
+                text += kw + '\t' + vol + '\t' + diff + '\t' + intent + '\t' + cpc + '\n';
+            });
+            navigator.clipboard.writeText(text).then(function () {
+                copyBtn.textContent = '✓ Copied';
+                setTimeout(function () { copyBtn.textContent = 'Copy to Clipboard'; }, 1500);
+            });
+        });
+    }
+</script>
+{% endblock %}

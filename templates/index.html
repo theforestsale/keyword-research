@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}AI Keyword Research Tool{% endblock %}
+
+{% block content %}
+<section class="hero">
+    <h1>Research Keywords with AI</h1>
+    <p class="subtitle">Enter a seed keyword and get related keyword ideas with estimated metrics.</p>
+</section>
+
+<section class="search-box">
+    {% include "components/search_form.html" %}
+</section>
+
+<section id="loading" class="loading hidden">
+    <div class="spinner"></div>
+    <p>Researching keywords... this may take a moment.</p>
+</section>
+
+{% if recent_searches %}
+<section class="history">
+    <div class="history-header">
+        <h2>Recent Searches</h2>
+        <a href="{{ url_for('manage.compare') }}" class="btn btn-small">Compare</a>
+    </div>
+    <table class="history-table">
+        <thead>
+            <tr>
+                <th>Keyword</th>
+                <th>Results</th>
+                <th>Group</th>
+                <th>Date</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for s in recent_searches %}
+            <tr>
+                <td>{{ s.seed_keyword }}</td>
+                <td>{{ s.keywords|length }} keywords</td>
+                <td>{% if s.folder %}{{ s.folder.name }}{% else %}<span class="muted">—</span>{% endif %}</td>
+                <td>{{ s.created_at.strftime("%Y-%m-%d %H:%M") }}</td>
+                <td><a href="{{ url_for('research.view_results', search_id=s.id) }}" class="btn btn-small">View</a></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</section>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/app.js') }}"></script>
+{% endblock %}

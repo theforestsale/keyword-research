@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="results-header">
+    <h1>{{ title }}</h1>
+    <div class="results-actions">
+        <a href="{{ url_for('research.tools_page') }}" class="btn btn-secondary">Back to Tools</a>
+        <button class="btn" id="copyBtn">Copy to Clipboard</button>
+    </div>
+</div>
+
+<div class="tool-output" id="copyBox">
+    {% if tool == "expand" and terms %}
+        <h3>Generated terms</h3>
+        <ul class="term-list">
+            {% for t in terms %}
+            <li>{{ t }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    {% if tool == "intent" and intent_rows %}
+        <table class="results-table">
+            <thead>
+                <tr><th>Keyword</th><th>Intent</th></tr>
+            </thead>
+            <tbody>
+                {% for row in intent_rows %}
+                <tr>
+                    <td>{{ row.keyword }}</td>
+                    <td><span class="intent-tag intent-{{ row.intent }}">{{ row.intent }}</span></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
+
+    {% if tool == "cluster" and clusters %}
+        {% for c in clusters %}
+        <div class="cluster">
+            <h3>{{ c.title }}</h3>
+            <p class="brief">{{ c.brief }}</p>
+            <ul class="term-list">
+                {% for k in c.keywords %}<li>{{ k }}</li>{% endfor %}
+            </ul>
+        </div>
+        {% endfor %}
+    {% endif %}
+
+    {% if tool == "ppc" and estimates %}
+        <table class="results-table">
+            <thead>
+                <tr><th>Keyword</th><th>Impressions</th><th>CTR</th><th>Clicks</th><th>CPC</th><th>Monthly Cost</th></tr>
+            </thead>
+            <tbody>
+                {% for e in estimates %}
+                <tr>
+                    <td>{{ e.keyword }}</td>
+                    <td class="num">{{ "{:,}".format(e.impressions) }}</td>
+                    <td class="num">{{ "%.1f%%"|format(e.ctr*100) }}</td>
+                    <td class="num">{{ "{:,}".format(e.clicks) }}</td>
+                    <td class="num">${{ "%.2f"|format(e.cpc) }}</td>
+                    <td class="num">${{ "%.2f"|format(e.monthly_cost) }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.getElementById('copyBtn')?.addEventListener('click', function () {
+    const box = document.getElementById('copyBox');
+    let text = '';
+    box.querySelectorAll('h3').forEach(h => text += h.textContent + '\n');
+    box.querySelectorAll('tr').forEach((tr, i) => {
+        const cells = tr.querySelectorAll('td, th');
+        if (cells.length) text += [...cells].map(c => c.textContent.trim()).join('\t') + '\n';
+    });
+    box.querySelectorAll('.term-list li').forEach(li => text += li.textContent + '\n');
+    navigator.clipboard.writeText(text).then(() => {
+        this.textContent = '✓ Copied';
+        setTimeout(() => this.textContent = 'Copy to Clipboard', 1500);
+    });
+});
+</script>
+{% endblock %}
